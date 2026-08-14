@@ -8,6 +8,11 @@ import { AppHeartbeat } from './entities/app-heartbeat.entity';
 export class HeartbeatsController {
   constructor(private readonly heartbeatsService: HeartbeatsService) {}
 
+  @Get('latest')
+  async getLatest(): Promise<AppHeartbeat[]> {
+    return this.heartbeatsService.getLatestHeartbeats();
+  }
+
   @Get()
   async findAll(@Query() paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<AppHeartbeat>> {
     return this.heartbeatsService.findAll(paginationQuery);

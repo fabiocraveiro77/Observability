@@ -32,4 +32,18 @@ export class HeartbeatsService {
 
     return new PaginatedResponseDto<AppHeartbeat>(data, total, page, limit);
   }
+
+  async getLatestHeartbeats(): Promise<AppHeartbeat[]> {
+    return this.heartbeatRepository.createQueryBuilder('hb')
+      .innerJoin(
+        (qb) => qb.select('app_name')
+                  .addSelect('MAX(timestamp)', 'max_timestamp')
+                  .from(AppHeartbeat, 'hb2')
+                  .groupBy('app_name'),
+        'grouped_hb',
+        'hb.app_name = grouped_hb.app_name AND hb.timestamp = grouped_hb.max_timestamp'
+      )
+      .orderBy('hb.timestamp', 'DESC')
+      .getMany();
+  }
 }

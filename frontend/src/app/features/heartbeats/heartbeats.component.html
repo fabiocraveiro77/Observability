@@ -1,0 +1,98 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Monitoramento de Heartbeats</h1>
+    <p class="page-subtitle">
+      Status em tempo real das aplicações 
+      <span *ngIf="lastUpdate()" class="update-badge">
+        <span class="material-symbols-outlined" style="font-size: 14px; margin-right: 4px;">schedule</span>
+        Última atualização: {{ lastUpdate() | date:'HH:mm:ss' }}
+      </span>
+    </p>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-primary shadow-sm" (click)="manualRefresh()" [disabled]="loading()">
+      <span class="material-symbols-outlined icon-left" [class.spin]="loading()">refresh</span>
+      {{ loading() ? 'Sincronizando...' : 'Atualizar Dados' }}
+    </button>
+    <a routerLink="/" class="btn btn-outline shadow-sm">
+      <span class="material-symbols-outlined icon-left">arrow_back</span>
+      Voltar
+    </a>
+  </div>
+</div>
+
+<!-- Premium Status Grid -->
+<div class="status-grid">
+  <div class="premium-status-card" *ngFor="let app of latestHeartbeats()" [class.is-alive]="isAlive(app.timestamp)">
+    <div class="card-header">
+      <div class="icon-ring">
+        <span class="material-symbols-outlined">{{ isAlive(app.timestamp) ? 'monitor_heart' : 'heart_broken' }}</span>
+      </div>
+      <div class="status-badge" [class.alive]="isAlive(app.timestamp)" [class.dead]="!isAlive(app.timestamp)">
+        <span class="led-pulse" *ngIf="isAlive(app.timestamp)"></span>
+        {{ isAlive(app.timestamp) ? 'Online' : 'Offline' }}
+      </div>
+    </div>
+    <div class="card-body">
+      <h2 class="app-name" title="{{ app.app_name }}">{{ app.app_name }}</h2>
+      <div class="meta-data">
+        <div class="meta-row">
+          <span class="material-symbols-outlined meta-icon">tag</span>
+          <span class="meta-text" title="Execution ID">{{ app.execution_id || 'N/A' }}</span>
+        </div>
+        <div class="meta-row">
+          <span class="material-symbols-outlined meta-icon">update</span>
+          <span class="meta-text">{{ app.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State for Grid -->
+  <div class="premium-status-card empty" *ngIf="latestHeartbeats().length === 0 && !loading()">
+    <div class="status-details" style="align-items: center; justify-content: center; width: 100%;">
+      <span class="material-symbols-outlined" style="font-size: 2.5rem; color: #d1d5db; margin-bottom: 1rem;">monitor_heart</span>
+      <span style="color: #6b7280; font-size: 1rem; font-weight: 500;">Nenhum heartbeat recente.</span>
+    </div>
+  </div>
+</div>
+
+<!-- History Table Card -->
+<div class="card table-card">
+  <div class="table-toolbar">
+    <h3 style="margin: 0; font-size: 1.1rem; color: #374151; font-weight: 600;">Histórico Recente (Últimos 10)</h3>
+    <div class="loading-indicator" *ngIf="loading()">
+      <span class="material-symbols-outlined spin" style="font-size: 1.2rem; color: #2563eb;">sync</span>
+      <span style="font-size: 0.85rem; color: #6b7280;">Atualizando...</span>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th style="width: 80px">ID</th>
+          <th>Aplicação</th>
+          <th>Execution ID</th>
+          <th>Data/Hora</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let log of historyHeartbeats()" class="table-row">
+          <td class="text-muted fw-600">#{{ log.id }}</td>
+          <td style="font-weight: 600; color: #111827;">{{ log.app_name }}</td>
+          <td class="text-mono">{{ log.execution_id || 'N/A' }}</td>
+          <td class="text-muted">{{ log.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+        </tr>
+        
+        <tr *ngIf="historyHeartbeats().length === 0 && !loading()">
+          <td colspan="4" class="empty-state">
+            <span class="material-symbols-outlined empty-icon">inbox</span>
+            <h3>Nenhum registro encontrado</h3>
+            <p>Ainda não há histórico de heartbeats.</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

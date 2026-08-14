@@ -3,10 +3,16 @@
     <h1 class="page-title">Eventos de Observabilidade</h1>
     <p class="page-subtitle">Monitoramento em tempo real ({{ totalRecords() | number }} eventos)</p>
   </div>
-  <button class="btn btn-primary shadow-sm" (click)="fetchData()" [disabled]="loading()">
-    <span class="material-symbols-outlined icon-left">refresh</span>
-    {{ loading() ? 'Sincronizando...' : 'Atualizar Dados' }}
-  </button>
+  <div class="header-actions">
+    <a routerLink="/heartbeats" class="btn btn-outline shadow-sm">
+      <span class="material-symbols-outlined icon-left">monitor_heart</span>
+      HeartBeats
+    </a>
+    <button class="btn btn-primary shadow-sm" (click)="fetchData()" [disabled]="loading()">
+      <span class="material-symbols-outlined icon-left">refresh</span>
+      {{ loading() ? 'Sincronizando...' : 'Atualizar Dados' }}
+    </button>
+  </div>
 </div>
 
 <!-- Stats Grid -->

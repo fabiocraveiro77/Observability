@@ -23,6 +23,13 @@ export interface ObservabilityEvent {
   external_reference: string;
 }
 
+export interface Heartbeat {
+  id: number;
+  timestamp: string;
+  app_name: string;
+  execution_id: string;
+}
+
 export interface PaginatedResponse<T> {
   data: T[];
   total: number;
@@ -65,8 +72,13 @@ export class ObservabilityService {
     return this.http.get<PaginatedResponse<ObservabilityEvent>>(`${this.apiUrl}/observability`, { params });
   }
 
-  getHeartbeats(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/heartbeats`);
+  getHeartbeats(limit: number = 50): Observable<PaginatedResponse<Heartbeat>> {
+    let params = new HttpParams().set('limit', limit.toString());
+    return this.http.get<PaginatedResponse<Heartbeat>>(`${this.apiUrl}/heartbeats`, { params });
+  }
+
+  getLatestHeartbeats(): Observable<Heartbeat[]> {
+    return this.http.get<Heartbeat[]>(`${this.apiUrl}/heartbeats/latest`);
   }
 
   getApps(): Observable<string[]> {
