@@ -1,0 +1,161 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Eventos de Observabilidade</h1>
+    <p class="page-subtitle">Monitoramento em tempo real ({{ totalRecords() | number }} eventos)</p>
+  </div>
+  <button class="btn btn-primary shadow-sm" (click)="fetchData()" [disabled]="loading()">
+    <span class="material-symbols-outlined icon-left">refresh</span>
+    {{ loading() ? 'Sincronizando...' : 'Atualizar Dados' }}
+  </button>
+</div>
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-icon-wrapper blue">
+      <span class="material-symbols-outlined">receipt_long</span>
+    </div>
+    <div class="stat-details">
+      <span class="stat-title">Total Processado</span>
+      <span class="stat-value">{{ stats().total | number }}</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon-wrapper green">
+      <span class="material-symbols-outlined">check_circle</span>
+    </div>
+    <div class="stat-details">
+      <span class="stat-title">Sucesso</span>
+      <span class="stat-value">{{ stats().success | number }}</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon-wrapper red">
+      <span class="material-symbols-outlined">error</span>
+    </div>
+    <div class="stat-details">
+      <span class="stat-title">Erros</span>
+      <span class="stat-value">{{ stats().error | number }}</span>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon-wrapper orange">
+      <span class="material-symbols-outlined">pending_actions</span>
+    </div>
+    <div class="stat-details">
+      <span class="stat-title">Pendentes</span>
+      <span class="stat-value">{{ stats().pendings | number }}</span>
+    </div>
+  </div>
+</div>
+
+<!-- Data Table Card -->
+<div class="card table-card">
+  <!-- Filters Component -->
+  <div class="table-toolbar">
+    <app-smart-filters [initialState]="currentFilters()" (filtersChanged)="onFiltersChanged($event)" style="flex: 1;"></app-smart-filters>
+    <label class="toggle-filter" [class.active]="showOnlySelected()">
+      <input type="checkbox" [checked]="showOnlySelected()" (change)="toggleShowSelected()">
+      <span class="material-symbols-outlined">checklist</span>
+      Apenas Selecionados ({{ selectedItems().size }})
+    </label>
+  </div>
+
+  <div class="table-responsive">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th style="width: 40px" class="checkbox-cell">
+            <input type="checkbox" class="custom-checkbox" [checked]="isAllPageSelected()" (change)="toggleSelectAllPage($event)" *ngIf="!showOnlySelected()">
+          </th>
+          <th style="width: 50px"></th>
+          <th style="width: 80px">ID</th>
+          <th>Transaction ID</th>
+          <th>App Name</th>
+          <th>Partner</th>
+          <th>Ação</th>
+          <th>Status</th>
+          <th>Data de Registro</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let log of displayedLogs()">
+          <tr class="table-row" 
+              [class.expanded]="expandedRowIds().has(log.id)"
+              [class.selected]="selectedItems().has(log.id)"
+              (click)="toggleRow(log.id)">
+            <td class="checkbox-cell" (click)="$event.stopPropagation()">
+              <input type="checkbox" class="custom-checkbox" [checked]="selectedItems().has(log.id)" (change)="toggleSelection(log, $event)">
+            </td>
+            <td class="expand-cell">
+              <span class="material-symbols-outlined expand-icon">
+                {{ expandedRowIds().has(log.id) ? 'keyboard_arrow_down' : 'chevron_right' }}
+              </span>
+            </td>
+            <td class="text-muted">#{{ log.id }}</td>
+            <td>
+              <a [routerLink]="['/timeline', log.transaction_id]" class="cod-link" (click)="$event.stopPropagation()">
+                <span class="material-symbols-outlined link-icon">timeline</span>
+                {{ log.transaction_id || 'N/A' }}
+              </a>
+            </td>
+            <td>{{ log.app_name }}</td>
+            <td>
+              <div class="partner-cell">
+                <span class="material-symbols-outlined partner-icon">storefront</span>
+                {{ log.partner_name || 'N/A' }}
+              </div>
+            </td>
+            <td class="text-mono">{{ log.action_code }}</td>
+            <td>
+              <span class="tag tag-{{ getSeverity(log.status) }}">{{ log.status }}</span>
+            </td>
+            <td class="text-muted">{{ log.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+          </tr>
+          
+          <!-- Expanded Row for specific logs details -->
+          <tr class="expanded-content-row" *ngIf="expandedRowIds().has(log.id)">
+            <td colspan="9">
+              <div class="expanded-details" style="padding-bottom: 1rem;">
+                <p><strong>Trace ID:</strong> {{ log.trace_id || 'N/A' }} | <strong>Exec ID:</strong> {{ log.execution_id || 'N/A' }}</p>
+                <p><strong>Ref Interna:</strong> {{ log.internal_reference || 'N/A' }}</p>
+                <p><strong>Ref Externa:</strong> {{ log.external_reference || 'N/A' }}</p>
+                <p><strong>Tipo Payload:</strong> {{ log.payload_type || 'N/A' }}</p>
+                
+                <div class="json-grids" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                  <app-json-viewer [data]="log.request_data" title="Request Data"></app-json-viewer>
+                  <app-json-viewer [data]="log.response_data" title="Response Data"></app-json-viewer>
+                  <app-json-viewer [data]="log.payload_data" title="Payload Data" style="grid-column: 1 / -1"></app-json-viewer>
+                </div>
+                
+                <div class="error-stack" *ngIf="log.error_stacktrace" style="margin-top: 1rem; color: #dc2626; background: #fef2f2; padding: 1rem; border-radius: 8px;">
+                  <strong style="display: block; margin-bottom: 0.5rem">Error Stacktrace:</strong>
+                  <pre style="margin: 0; white-space: pre-wrap; font-size: 0.85rem; font-family: monospace;">{{ log.error_stacktrace }}</pre>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </ng-container>
+
+        <tr *ngIf="displayedLogs().length === 0 && !loading()">
+          <td colspan="9" class="empty-state">
+            <span class="material-symbols-outlined empty-icon">inbox</span>
+            <h3>Nenhum registro encontrado</h3>
+            <p>Ajuste os filtros de busca para encontrar eventos.</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pagination-controls" *ngIf="totalPages() > 1 && !showOnlySelected()">
+    <button class="btn btn-icon" (click)="prevPage()" [disabled]="currentPage() === 1">
+      <span class="material-symbols-outlined">chevron_left</span> Anterior
+    </button>
+    <span class="page-indicator">Página {{ currentPage() }} de {{ totalPages() }}</span>
+    <button class="btn btn-icon" (click)="nextPage()" [disabled]="currentPage() === totalPages()">
+      Próxima <span class="material-symbols-outlined">chevron_right</span>
+    </button>
+  </div>
+</div>

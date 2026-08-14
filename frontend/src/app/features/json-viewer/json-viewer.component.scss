@@ -1,0 +1,40 @@
+.json-viewer-container {
+  background: #1e293b;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 1rem;
+}
+
+.json-header {
+  background: #0f172a;
+  color: #cbd5e1;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-bottom: 1px solid #334155;
+  cursor: pointer;
+  user-select: none;
+}
+
+.json-header:hover {
+  background: #1e293b;
+}
+
+.toggle-icon {
+  margin-left: auto;
+}
+
+.json-code {
+  margin: 0;
+  padding: 1.25rem;
+  color: #e2e8f0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  overflow-x: auto;
+  max-height: 400px;
+}
