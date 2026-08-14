@@ -5,7 +5,8 @@ import { PaginatedResponseDto } from '../common/dto/paginated-response.dto';
 export declare class ObservabilityService {
     private readonly eventRepository;
     constructor(eventRepository: Repository<ObservabilityEvent>);
+    private applyFilters;
     findAll(paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<ObservabilityEvent>>;
     getApps(): Promise<string[]>;
-    getStats(): Promise<any>;
+    getStats(query?: PaginationQueryDto): Promise<any>;
 }

@@ -12,24 +12,20 @@ export class ObservabilityService {
     private readonly eventRepository: Repository<ObservabilityEvent>,
   ) {}
 
-  async findAll(paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<ObservabilityEvent>> {
-    const { 
-      page = 1, limit = 20, app_name, status, partner_name, transaction_id, trace_id, search 
-    } = paginationQuery;
-    
-    const skip = (page - 1) * limit;
-    
-    const qb = this.eventRepository.createQueryBuilder('event').where('1=1');
+  private applyFilters(qb: any, query: PaginationQueryDto) {
+    const { app_name, status, partner_name, transaction_id, trace_id, search, startDate, endDate } = query;
 
     if (app_name) qb.andWhere('event.app_name = :app_name', { app_name });
     if (status) qb.andWhere('event.status = :status', { status });
     if (partner_name) qb.andWhere('event.partner_name = :partner_name', { partner_name });
     if (transaction_id) qb.andWhere('event.transaction_id = :transaction_id', { transaction_id });
     if (trace_id) qb.andWhere('event.trace_id = :trace_id', { trace_id });
+    if (startDate) qb.andWhere('event.timestamp >= :startDate', { startDate: new Date(startDate) });
+    if (endDate) qb.andWhere('event.timestamp <= :endDate', { endDate: new Date(endDate) });
     
     if (search) {
       qb.andWhere(
-        new Brackets((sqb) => {
+        new Brackets((sqb: any) => {
           sqb.where('event.internal_reference LIKE :search', { search: `%${search}%` })
              .orWhere('event.external_reference LIKE :search', { search: `%${search}%` })
              .orWhere('event.action_code LIKE :search', { search: `%${search}%` })
@@ -38,6 +34,15 @@ export class ObservabilityService {
         })
       );
     }
+  }
+
+  async findAll(paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<ObservabilityEvent>> {
+    const { page = 1, limit = 20 } = paginationQuery;
+    
+    const skip = (page - 1) * limit;
+    
+    const qb = this.eventRepository.createQueryBuilder('event').where('1=1');
+    this.applyFilters(qb, paginationQuery);
 
     qb.orderBy('event.timestamp', 'DESC');
     qb.skip(skip).take(limit);
@@ -57,22 +62,26 @@ export class ObservabilityService {
     return result.map(r => r.app_name);
   }
 
-  async getStats(): Promise<any> {
-    const qb = this.eventRepository.createQueryBuilder('event');
+  async getStats(query: PaginationQueryDto = {}): Promise<any> {
+    const baseQb = () => {
+      const qb = this.eventRepository.createQueryBuilder('event').where('1=1');
+      this.applyFilters(qb, query);
+      return qb;
+    };
     
-    const totalEvents = await qb.getCount();
+    const totalEvents = await baseQb().getCount();
     
-    const successEvents = await this.eventRepository.createQueryBuilder('event')
-      .where('event.status = :status', { status: 'SUCCESS' })
+    const successEvents = await baseQb()
+      .andWhere('event.status = :successStatus', { successStatus: 'SUCCESS' })
       .getCount();
       
     const errorStatuses = ['HTTP_ERROR', 'BUSINESS_ERROR', 'VALIDATION_FAILED', 'EXCEPTION', 'TIMEOUT'];
-    const errorEvents = await this.eventRepository.createQueryBuilder('event')
-      .where('event.status IN (:...statuses)', { statuses: errorStatuses })
+    const errorEvents = await baseQb()
+      .andWhere('event.status IN (:...errorStatuses)', { errorStatuses })
       .getCount();
 
-    const pendingEvents = await this.eventRepository.createQueryBuilder('event')
-      .where('event.status = :status', { status: 'PENDING' })
+    const pendingEvents = await baseQb()
+      .andWhere('event.status = :pendingStatus', { pendingStatus: 'PENDING' })
       .getCount();
 
     return {

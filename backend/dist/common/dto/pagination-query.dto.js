@@ -21,6 +21,8 @@ class PaginationQueryDto {
     search;
     transaction_id;
     trace_id;
+    startDate;
+    endDate;
 }
 exports.PaginationQueryDto = PaginationQueryDto;
 __decorate([
@@ -68,4 +70,14 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], PaginationQueryDto.prototype, "trace_id", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], PaginationQueryDto.prototype, "startDate", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsDateString)(),
+    __metadata("design:type", String)
+], PaginationQueryDto.prototype, "endDate", void 0);
 //# sourceMappingURL=pagination-query.dto.js.map

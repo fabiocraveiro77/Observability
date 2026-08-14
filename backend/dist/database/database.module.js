@@ -31,6 +31,7 @@ exports.DatabaseModule = DatabaseModule = __decorate([
                     entities: [observability_event_entity_1.ObservabilityEvent, app_heartbeat_entity_1.AppHeartbeat],
                     synchronize: true,
                     logging: ['warn', 'error'],
+                    timezone: 'Z',
                 }),
             }),
         ],

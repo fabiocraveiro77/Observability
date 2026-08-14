@@ -14,8 +14,8 @@ export class ObservabilityController {
   }
 
   @Get('stats')
-  async getStats(): Promise<any> {
-    return this.observabilityService.getStats();
+  async getStats(@Query() query: PaginationQueryDto): Promise<any> {
+    return this.observabilityService.getStats(query);
   }
 
   @Get()

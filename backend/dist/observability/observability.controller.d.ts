@@ -6,6 +6,6 @@ export declare class ObservabilityController {
     private readonly observabilityService;
     constructor(observabilityService: ObservabilityService);
     getApps(): Promise<string[]>;
-    getStats(): Promise<any>;
+    getStats(query: PaginationQueryDto): Promise<any>;
     findAll(paginationQuery: PaginationQueryDto): Promise<PaginatedResponseDto<ObservabilityEvent>>;
 }

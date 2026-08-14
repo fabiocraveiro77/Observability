@@ -19,6 +19,7 @@ import { AppHeartbeat } from '../heartbeats/entities/app-heartbeat.entity';
         entities: [ObservabilityEvent, AppHeartbeat],
         synchronize: true, // Use false in real production, but useful for dev
         logging: ['warn', 'error'],
+        timezone: 'Z',
       }),
     }),
   ],

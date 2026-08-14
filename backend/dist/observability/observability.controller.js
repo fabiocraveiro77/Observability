@@ -24,8 +24,8 @@ let ObservabilityController = class ObservabilityController {
     async getApps() {
         return this.observabilityService.getApps();
     }
-    async getStats() {
-        return this.observabilityService.getStats();
+    async getStats(query) {
+        return this.observabilityService.getStats(query);
     }
     async findAll(paginationQuery) {
         return this.observabilityService.findAll(paginationQuery);
@@ -40,8 +40,9 @@ __decorate([
 ], ObservabilityController.prototype, "getApps", null);
 __decorate([
     (0, common_1.Get)('stats'),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [pagination_query_dto_1.PaginationQueryDto]),
     __metadata("design:returntype", Promise)
 ], ObservabilityController.prototype, "getStats", null);
 __decorate([

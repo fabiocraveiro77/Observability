@@ -7,4 +7,6 @@ export declare class PaginationQueryDto {
     search?: string;
     transaction_id?: string;
     trace_id?: string;
+    startDate?: string;
+    endDate?: string;
 }
