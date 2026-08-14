@@ -44,6 +44,8 @@ A arquitetura utiliza uma única tabela `observability_events`. A estrutura foi 
 - `PREPARE_PAYLOAD`: Transformação/construção de XML/JSON.
 - `SEND_TO_PARTNER`: Requisição HTTP/REST para parceiro.
 - `UPDATE_DATABASE`: Escrita do status final no banco local.
+- `WEBHOOK_UPDATE`: Recebe do webhook.
+- `MSG_UPDATE`: Recebe da mensageria.
 - `ERROR_HANDLING`: Tratamento de exceções (acionado no `catch`).
 
 ### 3.2 Lista de `status`
