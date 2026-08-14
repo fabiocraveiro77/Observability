@@ -17,11 +17,11 @@ import { AppHeartbeat } from '../heartbeats/entities/app-heartbeat.entity';
         password: configService.get<string>('DB_PASSWORD', 'root'),
         database: configService.get<string>('DB_DATABASE', 'observability_db'),
         entities: [ObservabilityEvent, AppHeartbeat],
-        synchronize: true, // Use false in real production, but useful for dev
+        synchronize: false, // Use false in real production, but useful for dev
         logging: ['warn', 'error'],
         timezone: 'Z',
       }),
     }),
   ],
 })
-export class DatabaseModule {}
+export class DatabaseModule { }
